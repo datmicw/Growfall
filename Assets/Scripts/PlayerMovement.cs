@@ -1,30 +1,39 @@
 ﻿using UnityEngine;
+
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 6.0f;
+    public float moveSpeed = 5f;
     private Rigidbody rb;
-    private Vector3 moveDirection;
+    public Vector3 collisionVelocity = new Vector3(25f, 5f, 10f);
 
-    void Start()
+    private void Start()
     {
         rb = GetComponent<Rigidbody>();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        float moveX = 0f;
-        float moveZ = 0f;
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
 
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-            moveX = 1f;
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-            moveX = -1f;
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-            moveZ = 1f;
-        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-            moveZ = -1f;
+        Vector3 movement = new Vector3(horizontalInput, 0f, verticalInput) * moveSpeed;
 
-        moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
-        rb.velocity = moveDirection * speed + new Vector3(0, rb.velocity.y, 0); 
+        rb.MovePosition(rb.position + movement * Time.fixedDeltaTime);
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Start")) // Kiểm tra tag "Start"
+        {
+            Debug.Log("Start");
+
+            // tạo hướng bật ngược lại
+            Vector3 bounceDirection = transform.position - collision.transform.position;
+            bounceDirection.y = 1f; // bật lên theo trục Y
+
+            // áp lực bật ra (ForceMode.Impulse để áp lực tức thời)
+            rb.AddForce(bounceDirection.normalized * collisionVelocity.magnitude, ForceMode.Impulse);
+        }
+    }
+
 }

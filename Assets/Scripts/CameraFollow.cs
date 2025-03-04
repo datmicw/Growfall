@@ -1,30 +1,30 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class CameraFollower : MonoBehaviour
+public class CameraFollow : MonoBehaviour
 {
     public Transform player;
-    public Vector3 offset = new Vector3(0, 5, -10);  // khoảng cách camera
-    public float smoothSpeed = 5f;  // tốc độ di chuyển mượt
-
-    private Vector3 lastPlayerPosition; // lưu vị trí trước đó của nhân vật
+    public Vector3 offset;
+    public float smoothSpeed = 1.5f;
 
     private void LateUpdate()
     {
-        if (player != null)
+        if (player != null) // kiem tra player co ton tai khong
         {
-            // kiểm tra nếu nhân vật thực sự di chuyển
-            if (player.position != lastPlayerPosition)
-            {
-                Vector3 desiredPosition = player.position + offset;
-                transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-
-                // xoay camera theo nhân vật
-                Quaternion targetRotation = Quaternion.LookRotation(player.position - transform.position);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, smoothSpeed * Time.deltaTime);
-            }
-
-            // cập nhật vị trí trước đó của nhân vật
-            lastPlayerPosition = player.position;
+            Vector3 desiredPosition = CalculateDesiredPosition();
+            SmoothMoveToPlayer(desiredPosition); // Di chuyen camera den vi tri mong muon
         }
+    }
+    private Vector3 CalculateDesiredPosition()
+    {
+        return player.position + offset; // Tinh toan vi tri
+    }
+
+    private void SmoothMoveToPlayer(Vector3 desiredPosition) // Di chuyen camera den vi tri mong muon
+    {
+        transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+        transform.LookAt(player);
     }
 }
